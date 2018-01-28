@@ -54,7 +54,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(rightWall)
         
         self.heli.physicsBody!.categoryBitMask = HeliCategory
-        borderBody.categoryBitMask = BorderCategory
+        borderBody.categoryBitMask = BorderCategory                     //TODO fjerne?
         leftWall.physicsBody!.categoryBitMask = LeftWallCategory
         rightWall.physicsBody!.categoryBitMask = RightWallCategory
         
