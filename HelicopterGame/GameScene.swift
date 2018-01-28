@@ -8,6 +8,7 @@
 
 import SpriteKit
 import GameplayKit
+import UIKit
 
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -18,6 +19,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let BorderCategory    : UInt32 = 0x1 << 3
     
     var heli = SKSpriteNode(imageNamed: "heli1-flipped")
+    var positionLabel: SKLabelNode!
     var touchPoint: CGPoint = CGPoint()
     var touching = false
     
@@ -40,9 +42,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.heli.physicsBody?.linearDamping = 0
         self.heli.physicsBody?.angularDamping = 0
         
-        self.heli.position = CGPoint(x: frame.origin.x + heli.size.width, y: size.height - heli.size.height)
+        self.heli.position = CGPoint(x: frame.origin.x + self.heli.size.width, y: size.height - self.heli.size.height)
         addChild(self.heli)
         self.heli.physicsBody!.applyImpulse(CGVector(dx: 2.0, dy: -2.0))
+        
+        self.positionLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        self.positionLabel.fontSize = 10.0
+        self.positionLabel.horizontalAlignmentMode = .left
+        self.positionLabel.position = CGPoint(x: frame.origin.x + 5, y: frame.origin.y + frame.size.height - 12)
+        addChild(self.positionLabel)
         
         
         let leftWallRect = CGRect(x: frame.origin.x, y: frame.origin.y, width: 1, height: frame.size.height)
@@ -50,7 +58,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         leftWall.physicsBody = SKPhysicsBody(edgeLoopFrom: leftWallRect)
         addChild(leftWall)
         
-        let rightWallRect = CGRect(x: frame.origin.x + self.frame.size.width, y: frame.origin.y, width: 1, height: frame.size.height)
+        let rightWallRect = CGRect(x: frame.origin.x + frame.size.width, y: frame.origin.y, width: 1, height: frame.size.height)
         let rightWall = SKNode()
         rightWall.physicsBody = SKPhysicsBody(edgeLoopFrom: rightWallRect)
         addChild(rightWall)
@@ -85,6 +93,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+        let posX = ceil(Double(self.heli.position.x))
+        let posY = ceil(Double(self.heli.position.y))
+        self.positionLabel.text = "Position: " + String(describing: posX) + ", " + String(describing: posY)
+        
         if touching {
             let dt: CGFloat = 1.0/60.0
             let distance = CGVector(dx: touchPoint.x - self.heli.position.x, dy: touchPoint.y - self.heli.position.y)
