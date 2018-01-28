@@ -9,6 +9,7 @@
 import SpriteKit
 import GameplayKit
 
+
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     let HeliCategory      : UInt32 = 0x1 << 0
@@ -17,7 +18,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let BorderCategory    : UInt32 = 0x1 << 3
     
     var heli = SKSpriteNode(imageNamed: "heli1-flipped")
-    var started = false
+    var touchPoint: CGPoint = CGPoint()
+    var touching = false
     
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.black
@@ -62,26 +64,40 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         }
     
-    func addHelicopter() {
-        
-        self.heli.physicsBody = SKPhysicsBody(rectangleOf: heli.size)
-        self.heli.physicsBody?.mass = 0.02
-        self.heli.physicsBody?.allowsRotation = false
-        self.heli.physicsBody?.friction = 0
-        self.heli.physicsBody?.restitution = 1
-        self.heli.physicsBody?.linearDamping = 0
-        self.heli.physicsBody?.angularDamping = 0
-        
-        
-        self.heli.position = CGPoint(x: size.width * 0.2, y: size.height)
-        addChild(self.heli)
-        self.heli.physicsBody!.applyImpulse(CGVector(dx: 2.0, dy: -2.0))
-        self.started = true
-        
-    
-       // heliMove(helicopter: heli)
-       
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let touch = touches.first!
+        let location = touch.location(in: self)
+        if self.heli.frame.contains(location) {
+            touchPoint = location
+            touching = true
+        }
     }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let touch = touches.first!
+        let location = touch.location(in: self)
+        touchPoint = location
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touching = false
+    }
+    
+    override func update(_ currentTime: CFTimeInterval) {
+        /* Called before each frame is rendered */
+        if touching {
+            let dt: CGFloat = 1.0/60.0
+            let distance = CGVector(dx: touchPoint.x - self.heli.position.x, dy: touchPoint.y - self.heli.position.y)
+            let velocity = CGVector(dx: distance.dx/dt, dy: distance.dy/dt)
+            
+            if velocity.dy.isLess(than: 0) { //change image according to direction heli is moving
+                self.heli.texture = SKTexture(imageNamed: "heli1")
+            } else if !velocity.dy.isLess(than: 0) {
+                self.heli.texture = SKTexture(imageNamed: "heli1-flipped")
+            }
+            self.heli.physicsBody!.velocity = velocity
+        }
+     }
     
     func didBegin(_ contact: SKPhysicsContact) {
         var firstBody: SKPhysicsBody
@@ -96,24 +112,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if firstBody.categoryBitMask == HeliCategory && secondBody.categoryBitMask == RightWallCategory {
-            print("Hit right wall!")
-            self.heli.texture = SKTexture(imageNamed: "heli1")
+            self.heli.texture = SKTexture(imageNamed: "heli1") //change image according to direction heli is moving
         } else if firstBody.categoryBitMask == HeliCategory && secondBody.categoryBitMask == LeftWallCategory {
-            print("Hit left wall!")
-            self.heli.texture = SKTexture(imageNamed: "heli1-flipped")
+            self.heli.texture = SKTexture(imageNamed: "heli1-flipped") //change image according to direction heli is moving
         }
     }
-    
-    /*override func update(_ currentTime: CFTimeInterval) {
-        /* Called before each frame is rendered */
-        if (self.started) {
-            var positive = true
-            let dy = self.heli.physicsBody?.velocity.dy
-            if Double(dy!) < 0.0 && positive {
-                print(dy)
-                positive = false
-            }
-        }*/
         
         
     
