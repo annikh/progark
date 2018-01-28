@@ -64,8 +64,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         self.heli.physicsBody!.contactTestBitMask = RightWallCategory | LeftWallCategory
         
-        addAttackHeli()
-        addAttackHeli()
+        addFootball()
+        addFootball()
         
         }
     
@@ -134,9 +134,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         return random() * (max - min) + min
     }
     
-    func addAttackHeli() {
-        let attackHeli = SKSpriteNode(imageNamed: "attackhelicopter")
-        attackHeli.size = CGSize(width: attackHeli.size.width * 0.3, height: attackHeli.size.height * 0.3)
+    func addFootball() {
+        let attackHeli = SKSpriteNode(imageNamed: "football-sprite")
+        attackHeli.size = CGSize(width: attackHeli.size.width * 0.05, height: attackHeli.size.height * 0.05)
         
         let actualY = random(min: attackHeli.size.height/2, max: size.height - attackHeli.size.height/2)
         
@@ -145,7 +145,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         attackHeli.physicsBody = SKPhysicsBody(rectangleOf: attackHeli.size)
         attackHeli.physicsBody?.mass = 0.01 * random()
-        attackHeli.physicsBody?.allowsRotation = false
+        attackHeli.physicsBody?.allowsRotation = true
         attackHeli.physicsBody?.friction = 0
         attackHeli.physicsBody?.restitution = 1
         attackHeli.physicsBody?.linearDamping = 0
