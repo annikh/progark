@@ -17,7 +17,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let BorderCategory    : UInt32 = 0x1 << 3
     
     var heli = SKSpriteNode(imageNamed: "heli1-flipped")
-    var started = false
     var timer = Timer()
     var directionLeft = false
     var frameMode = 1
@@ -64,6 +63,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         rightWall.physicsBody!.categoryBitMask = RightWallCategory
         
         self.heli.physicsBody!.contactTestBitMask = RightWallCategory | LeftWallCategory
+        
+        addAttackHeli()
+        addAttackHeli()
         
         }
     
@@ -118,11 +120,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.heli.position = CGPoint(x: size.width * 0.2, y: size.height)
         addChild(self.heli)
         self.heli.physicsBody!.applyImpulse(CGVector(dx: 2.0, dy: -2.0))
-        self.started = true
         
     
        // heliMove(helicopter: heli)
        
+    }
+    
+    func random() -> CGFloat {
+        return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
+    }
+    
+    func random(min: CGFloat, max: CGFloat) -> CGFloat {
+        return random() * (max - min) + min
+    }
+    
+    func addAttackHeli() {
+        let attackHeli = SKSpriteNode(imageNamed: "attackhelicopter")
+        attackHeli.size = CGSize(width: attackHeli.size.width * 0.3, height: attackHeli.size.height * 0.3)
+        
+        let actualY = random(min: attackHeli.size.height/2, max: size.height - attackHeli.size.height/2)
+        
+        attackHeli.position = CGPoint(x: size.width - 20, y: actualY)
+        addChild(attackHeli)
+        
+        attackHeli.physicsBody = SKPhysicsBody(rectangleOf: attackHeli.size)
+        attackHeli.physicsBody?.mass = 0.01 * random()
+        attackHeli.physicsBody?.allowsRotation = false
+        attackHeli.physicsBody?.friction = 0
+        attackHeli.physicsBody?.restitution = 1
+        attackHeli.physicsBody?.linearDamping = 0
+        attackHeli.physicsBody?.angularDamping = 0
+        
+        attackHeli.physicsBody!.applyImpulse(CGVector(dx: 2.0, dy: -2.0))
+        
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
