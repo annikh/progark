@@ -18,6 +18,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var heli = SKSpriteNode(imageNamed: "heli1-flipped")
     var started = false
+    var timer = Timer()
+    var directionLeft = false
+    var frameMode = 1
     
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.black
@@ -43,6 +46,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.heli.physicsBody!.applyImpulse(CGVector(dx: 2.0, dy: -2.0))
         
         
+        startTimer()
+        
         let leftWallRect = CGRect(x: frame.origin.x, y: frame.origin.y, width: 1, height: frame.size.height)
         let leftWall = SKNode()
         leftWall.physicsBody = SKPhysicsBody(edgeLoopFrom: leftWallRect)
@@ -61,6 +66,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.heli.physicsBody!.contactTestBitMask = RightWallCategory | LeftWallCategory
         
         }
+    
+    func startTimer() {
+        timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.changeHeliFrame), userInfo: nil, repeats: true)
+    }
+
+    
+    @objc func changeHeliFrame() {
+        if directionLeft {
+            if frameMode == 1 {
+                self.heli.texture = SKTexture(imageNamed: "heli2")
+                frameMode += 1
+            } else if frameMode == 2 {
+                self.heli.texture = SKTexture(imageNamed: "heli3")
+                frameMode += 1
+            } else if frameMode == 3 {
+                self.heli.texture = SKTexture(imageNamed: "heli4")
+                frameMode += 1
+            } else if frameMode == 4 {
+                self.heli.texture = SKTexture(imageNamed: "heli1")
+                frameMode = 1
+            }
+        } else {
+            if frameMode == 1 {
+                self.heli.texture = SKTexture(imageNamed: "heli2-flipped")
+                frameMode += 1
+            } else if frameMode == 2 {
+                self.heli.texture = SKTexture(imageNamed: "heli3-flipped")
+                frameMode += 1
+            } else if frameMode == 3 {
+                self.heli.texture = SKTexture(imageNamed: "heli4-flipped")
+                frameMode += 1
+            } else if frameMode == 4 {
+                self.heli.texture = SKTexture(imageNamed: "heli1-flipped")
+                frameMode = 1
+            }
+        }
+    }
     
     func addHelicopter() {
         
@@ -96,10 +138,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if firstBody.categoryBitMask == HeliCategory && secondBody.categoryBitMask == RightWallCategory {
-            print("Hit right wall!")
+            self.directionLeft = true
             self.heli.texture = SKTexture(imageNamed: "heli1")
         } else if firstBody.categoryBitMask == HeliCategory && secondBody.categoryBitMask == LeftWallCategory {
-            print("Hit left wall!")
+            self.directionLeft = false
             self.heli.texture = SKTexture(imageNamed: "heli1-flipped")
         }
     }
