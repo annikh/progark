@@ -176,29 +176,5 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    /*override func update(_ currentTime: CFTimeInterval) {
-        /* Called before each frame is rendered */
-        if (self.started) {
-            var positive = true
-            let dy = self.heli.physicsBody?.velocity.dy
-            if Double(dy!) < 0.0 && positive {
-                print(dy)
-                positive = false
-            }
-        }*/
-        
-        
-    
-    
-    /*func heliMove(helicopter: SKSpriteNode) {
-        let duration = 5.0
-        let posX = size.width - helicopter.size.width/2
-        let posY = helicopter.position.y + 200
-        
-        let actionMove = SKAction.move(to: CGPoint(x: posX, y: posY), duration: TimeInterval(duration))
-        let nextActionMove = SKAction.move(to: CGPoint(x: size.width * 0.2, y: posY + 200), duration: duration)
-        helicopter.run(SKAction.sequence([actionMove, nextActionMove]))
-    }*/
-    
     
 }
