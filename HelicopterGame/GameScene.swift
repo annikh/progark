@@ -56,18 +56,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         //place paddle1 on the screen and give it a physics body
         self.paddle1.position = CGPoint(x: frame.origin.x + self.paddle1.size.width, y: frame.origin.y + frame.size.height - self.paddle1.size.height)
-        addChild(self.paddle1)
         self.paddle1.physicsBody = SKPhysicsBody(rectangleOf: self.paddle1.size)
         self.paddle1.physicsBody?.isDynamic = false
         self.paddle1.physicsBody?.friction = 0
+        self.paddle1.name = "paddle1"
+        addChild(self.paddle1)
         
         //place paddle2 on the screen and give it a physics body
         self.paddle2.position = CGPoint(x: frame.origin.x + self.paddle2.size.width, y: frame.origin.y + self.paddle2.size.height)
-        addChild(self.paddle2)
         self.paddle2.physicsBody = SKPhysicsBody(rectangleOf: self.paddle1.size)
         self.paddle2.physicsBody?.isDynamic = false
         self.paddle2.physicsBody?.friction = 0
-        
+        self.paddle2.name = "paddle2"
+        addChild(self.paddle2)
         
         //place start text on the middle of the screen
         self.textLabel.text = "TAP THE SCREEN TO START!"
@@ -123,27 +124,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.ball.physicsBody!.applyImpulse(CGVector(dx: 2.0, dy: -2.0)) //make the ball start moving since that game has started
         }
         
-        /*let touch = touches.first!
-        let location = touch.location(in: self)
-        if self.paddle1.frame.contains(location) {
-            touchPoint = location
-            touchingPaddle1 = true
-        } else if self.paddle2.frame.contains(location) {
-            touchPoint = location
-            touchingPaddle2 = true
-        }*/
+        let touch = touches.first
+        let touchLocation = touch!.location(in: self)
+        
+        if let body = physicsWorld.body(at: touchLocation) {
+            if body.node!.name == "paddle1" {
+                touchingPaddle1 = true
+            } else if body.node!.name == "paddle2" {
+                touchingPaddle2 = true
+            }
+        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        /*let touch = touches.first!
-        let location = touch.location(in: self)
-        touchPoint = location*/
+        if touchingPaddle1 {
+            let touch = touches.first
+            let touchLocation = touch!.location(in: self)
+            let previousLocation = touch!.previousLocation(in: self)
+            //compute difference between new and old paddle position
+            var paddle1X = paddle1.position.x + (touchLocation.x - previousLocation.x)
+            //limit the paddle position so that it cannot move off screen
+            paddle1X = max(paddle1X, paddle1.size.width/2)
+            paddle1X = min(paddle1X, size.width - paddle1.size.width/2)
+            //change paddle position
+            paddle1.position = CGPoint(x: paddle1X, y: paddle1.position.y)
+        } else if touchingPaddle2 {
+            let touch = touches.first
+            let touchLocation = touch!.location(in: self)
+            let previousLocation = touch!.previousLocation(in: self)
+            //compute difference between new and old paddle position
+            var paddle2X = paddle2.position.x + (touchLocation.x - previousLocation.x)
+            //limit the paddle position so that it cannot move off screen
+            paddle2X = max(paddle2X, paddle2.size.width/2)
+            paddle2X = min(paddle2X, size.width - paddle2.size.width/2)
+            //change paddle position
+            paddle2.position = CGPoint(x: paddle2X, y: paddle2.position.y)
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        /*touchingPaddle1 = false
-        touchingPaddle2 = false*/
+        touchingPaddle1 = false
+        touchingPaddle2 = false
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -156,13 +178,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.replayLabel.text = "TAP SCREEN TO PLAY AGAIN"
             resetBall()
         }
-        
-        /*if touchingPaddle1 {
-            let dt: CGFloat = 1.0/60.0
-            let distance = CGVector(dx: touchPoint.x - self.paddle1.position.x, dy: touchPoint.y - self.paddle1.position.y)
-            let velocity = CGVector(dx: distance.dx/dt, dy: distance.dy/dt)
-            self.paddle1.physicsBody!.velocity = velocity
-        }*/
     }
     
     
