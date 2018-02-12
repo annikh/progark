@@ -9,26 +9,100 @@
 import SpriteKit
 import GameplayKit
 
+protocol IScoreObserver {
+    
+    var score1: SKLabelNode { get }
+    var score2: SKLabelNode { get }
+    func scoreUpdated(newScore: Int, playerNumber: Int)
+    
+}
+
+class ScoreBoard: IScoreObserver {
+    
+    
+    var score1 = SKLabelNode()
+    var score2 = SKLabelNode()
+    
+    init() {
+        score1.text = "0"
+        score2.text = "0"
+    }
+    
+    func scoreUpdated(newScore: Int, playerNumber: Int) {
+        if playerNumber == 1 {
+            score1.text = "\(newScore)"
+        } else if playerNumber == 2 {
+            score2.text = "\(newScore)"
+        }
+    }
+}
+
+class Ball: SKSpriteNode {
+    
+    static let INSTANCE = Ball()
+    
+    private init() { //the constructor is private, so it cannot be called. Hence the object cannot be initialized several times.
+        let texture = SKTexture(imageNamed: "ping_pong")
+        super.init(texture: texture, color: UIColor.clear, size: texture.size())
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+}
+
+
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     let BallCategory      : UInt32 = 0x1 << 0
     let TopWallCategory   : UInt32 = 0x1 << 1
     let BottomWallCategory: UInt32 = 0x1 << 2
     
-    var ball = SKSpriteNode(imageNamed: "ping_pong")
+    private var observerArray = [IScoreObserver]()
+    var ball = Ball.INSTANCE
     var paddle1 = SKSpriteNode(imageNamed: "pong_paddle_white")
     var paddle2 = SKSpriteNode(imageNamed: "pong_paddle_white")
     var textLabel = SKLabelNode()
     var replayLabel = SKLabelNode()
-    var score1Value = 0
-    var score2Value = 0
-    var score1 = SKLabelNode()
-    var score2 = SKLabelNode()
     var touchPoint = CGPoint()
     var touchingPaddle1 = false
     var touchingPaddle2 = false
     var started = false
     var gameOver = false
+    var scoreBoard = ScoreBoard()
+    
+    private var _score1Value = 0
+    var score1Value : Int {
+        set {
+            _score1Value = newValue
+            notifyScoreChanged(newScore: newValue, playerNumber: 1)
+        }
+        get {
+            return _score1Value
+        }
+    }
+    
+    private var _score2Value = 0
+    var score2Value : Int {
+        set {
+            _score2Value = newValue
+            notifyScoreChanged(newScore: newValue, playerNumber: 2)
+        }
+        get {
+            return _score2Value
+        }
+    }
+    
+    
+    func attachObserver(observer : IScoreObserver){
+        observerArray.append(observer)
+    }
+    
+    private func notifyScoreChanged(newScore: Int, playerNumber: Int){
+        for observer in observerArray {
+            observer.scoreUpdated(newScore: newScore, playerNumber: playerNumber)
+        }
+    }
     
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.black
@@ -78,10 +152,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(self.replayLabel)
         
         //add scores to the screen
-        self.score1.position = CGPoint(x: frame.size.width - 25, y: frame.size.height/2 + 20)
-        self.score2.position = CGPoint(x: frame.size.width - 25, y: frame.size.height/2 - 20)
-        addChild(self.score1)
-        addChild(self.score2)
+        attachObserver(observer: scoreBoard)
+        let score1 = scoreBoard.score1
+        let score2 = scoreBoard.score2
+        score1.position = CGPoint(x: frame.size.width - 25, y: frame.size.height/2 + 20)
+        score2.position = CGPoint(x: frame.size.width - 25, y: frame.size.height/2 - 20)
+        addChild(score1)
+        addChild(score2)
         
         
         let topWallRect = CGRect(x: frame.origin.x, y: frame.origin.y + frame.size.height, width: frame.size.width, height: -1)
@@ -119,8 +196,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.started = true
             self.score1Value = 0
             self.score2Value = 0
-            self.score1.text = "\(score1Value)"
-            self.score2.text = "\(score2Value)"
+            
             self.ball.physicsBody!.applyImpulse(CGVector(dx: 2.0, dy: -2.0)) //make the ball start moving since that game has started
         }
         
@@ -203,12 +279,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if firstBody.categoryBitMask == BallCategory && secondBody.categoryBitMask == TopWallCategory {
             resetBall()
             self.score2Value += 1
-            self.score2.text = "\(score2Value)"
             self.ball.physicsBody!.applyImpulse(CGVector(dx: 2.0, dy: -2.0))
         } else if firstBody.categoryBitMask == BallCategory && secondBody.categoryBitMask == BottomWallCategory {
             resetBall()
             self.score1Value += 1
-            self.score1.text = "\(score1Value)"
             self.ball.physicsBody!.applyImpulse(CGVector(dx: -2.0, dy: 2.0))
         }
     }
